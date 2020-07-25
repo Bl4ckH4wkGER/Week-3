@@ -57,19 +57,48 @@ module.exports.getBySearchTerm = async (query) => {
     ).sort({ score: { $meta: "textScore" } }).lean();
 }
 
-// module.exports.getAuthorStats = async (authorInfo) => {
-//   if (authorInfo == true) {
-//     return Book.aggregate([
-//       {},
-//       {}
-//     ])
-//   } else {
-//     return Book.aggregate([
-//       {},
-//       {}
-//     ])
-//   }
-// }
+module.exports.getAuthorStats = async (authorInfo) => {
+  if (!authorInfo) {
+    return Book.aggregate([
+      { $group: {
+        _id: "$authorId",
+        averagePageCount: { $avg: "$pageCount"},
+        numBooks: { $sum: 1 },
+        titles: { $push: "$title"}
+      }},
+      { $project: {
+        _id: 0,
+        authorId: '$_id',
+        averagePageCount: 1,
+        numBooks: 1,
+        titles: 1
+      }},
+    ]);
+  } else {
+    return Book.aggregate([
+      { $group: {
+        _id: "$authorId",
+        averagePageCount: { $avg: "$pageCount"},
+        numBooks: { $sum: 1 },
+        titles: { $push: "$title"}
+      }},
+      { $project: {
+        _id: 0,
+        authorId: '$_id',
+        averagePageCount: 1,
+        numBooks: 1,
+        titles: 1
+      }},
+      { $lookup: {
+        from: "authors",
+        localField: "_id",
+        foreignField: "authorId",
+        as: "author"
+      }},
+      { $unwind: "$author"}
+    ])
+  }
+}
 
 class BadDataError extends Error {};
 module.exports.BadDataError = BadDataError;

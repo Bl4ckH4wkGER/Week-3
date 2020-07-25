@@ -34,15 +34,15 @@ router.get("/search", async (req, res, next) => {
 });
 
 // GET /authors/stats with possible authorInfo query [**some sort of combination?**]
-// router.get("/authors/stats", async (req, res, next) => {
-//   let { authorInfo } = req.query
-//   const stats = await bookDAO.getAuthorStats(authorInfo)
-//   if (stats) {
-//     res.json(stats);
-//   } else {
-//     res.sendStatus(404);
-//   }
-// });
+router.get("/authors/stats", async (req, res, next) => {
+  let { authorInfo } = req.query
+  const stats = await bookDAO.getAuthorStats(authorInfo)
+  if (stats) {
+    res.json(stats);
+  } else {
+    res.sendStatus(404);
+  }
+});
 
 // Read - single book
 router.get("/:id", async (req, res, next) => {
