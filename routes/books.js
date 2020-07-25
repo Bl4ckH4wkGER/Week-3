@@ -1,4 +1,4 @@
-const { Router } = require("express");
+const { Router, query } = require("express");
 const router = Router();
 
 const bookDAO = require('../daos/book');
@@ -22,6 +22,28 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+// GET /search with query
+router.get("/search", async (req, res, next) => {
+  let { query } = req.query;
+  const queryResults = await bookDAO.getBySearchTerm(query);
+  if (queryResults) {
+    res.json(queryResults);
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+// GET /authors/stats with possible authorInfo query [**some sort of combination?**]
+// router.get("/authors/stats", async (req, res, next) => {
+//   let { authorInfo } = req.query
+//   const stats = await bookDAO.getAuthorStats(authorInfo)
+//   if (stats) {
+//     res.json(stats);
+//   } else {
+//     res.sendStatus(404);
+//   }
+// });
+
 // Read - single book
 router.get("/:id", async (req, res, next) => {
   const book = await bookDAO.getById(req.params.id);
@@ -32,12 +54,12 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// Read - all books
+// Read - all books + query by authorId if passed in
 router.get("/", async (req, res, next) => {
-  let { page, perPage } = req.query;
+  let { page, perPage, authorId } = req.query;
   page = page ? Number(page) : 0;
   perPage = perPage ? Number(perPage) : 10;
-  const books = await bookDAO.getAll(page, perPage);
+  const books = await bookDAO.getAll(page, perPage, authorId);
   res.json(books);
 });
 
